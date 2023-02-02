@@ -15,7 +15,11 @@ const productSchema = new mongoose.Schema({
     required: true,
     maxlength: 20,
   },
-  price: { type: Number, required: true, min: 0 },
+  price: {
+    type: Number,
+    required: true,
+    min: [0, "Price must be positive ya dodo!"],
+  },
   onSale: {
     type: Boolean,
     default: false,
@@ -33,23 +37,68 @@ const productSchema = new mongoose.Schema({
       default: 0,
     },
   },
+  size: {
+    type: String,
+    enum: ["S", "M", "L"],
+  },
 });
+
+// productSchema.methods.greet = function () {
+//   console.log("Hello Hi Hi!!");
+//   console.log(`from ${this.name}`);
+// };
+
+productSchema.methods.toggleOnSale = function () {
+  this.onSale = !this.onSale;
+  return this.save();
+};
+
+productSchema.methods.addCategory = function (newCat) {
+  this.categories.push(newCat);
+  return this.save();
+};
 
 const Product = mongoose.model("Product", productSchema);
 
-const bike = new Product({
-  name: "Bike Helmet",
-  price: 19.5,
-  categories: ["Cycling", "Safety"],
-});
+const findProduct = async () => {
+  const foundProduct = await Product.findOne({ name: "Mountain Bike" });
+  console.log(foundProduct);
+  await foundProduct.toggleOnSale();
+  console.log(foundProduct);
+  await foundProduct.addCategory("Outdoors");
+  console.log(foundProduct);
+};
 
-bike
-  .save()
-  .then((data) => {
-    console.log("It Worked!!");
-    console.log(data);
-  })
-  .catch((err) => {
-    console.log("No NO Oh");
-    console.log(err);
-  });
+findProduct();
+
+// const bike = new Product({
+//   name: "Cycling Jersey",
+//   price: 29.5,
+//   categories: ["Cycling"],
+//   size: "XS",
+// });
+
+// bike
+//   .save()
+//   .then((data) => {
+//     console.log("It Worked!!");
+//     console.log(data);
+//   })
+//   .catch((err) => {
+//     console.log("No NO Oh");
+//     console.log(err);
+//   });
+
+// Product.findOneAndUpdate(
+//   { name: "Tire Pump" },
+//   { price: 9.99 },
+//   { new: true, runValidators: true }
+// )
+//   .then((data) => {
+//     console.log("It Worked!!");
+//     console.log(data);
+//   })
+//   .catch((err) => {
+//     console.log("No NO Oh");
+//     console.log(err);
+//   });
